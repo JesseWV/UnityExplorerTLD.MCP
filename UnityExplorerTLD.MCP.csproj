@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AssemblyName>UnityExplorerTLD.MCP</AssemblyName>
+    <RootNamespace>UnityExplorerTLD.MCP</RootNamespace>
+    <DebugType>embedded</DebugType>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <!-- Override on the command line with -p:TheLongDarkPath="..." if your install differs -->
+    <TheLongDarkPath Condition="'$(TheLongDarkPath)' == ''">C:\Program Files (x86)\Steam\steamapps\common\TheLongDark</TheLongDarkPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- MelonLoader framework -->
+    <Reference Include="MelonLoader">
+      <HintPath>$(TheLongDarkPath)\MelonLoader\net6\MelonLoader.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+
+    <!--
+      NOTE: we deliberately do NOT reference UnityExplorerTLD.dll at compile time.
+      The addon binds to UnityExplorer's C# console entirely via runtime reflection
+      (UnityExplorer.CSConsole.ConsoleController / UI.Panels.LogPanel), so it stays
+      compatible across UnityExplorer builds even when their internal API changes.
+      The runtime dependency / load order is declared via MelonOptionalDependencies.
+    -->
+
+    <!-- JSON (provided by MelonLoader) -->
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>$(TheLongDarkPath)\MelonLoader\net6\Newtonsoft.Json.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+</Project>
