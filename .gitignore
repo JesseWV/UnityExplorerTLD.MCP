@@ -6,3 +6,5 @@ obj/
 *.csproj.user
 dist/
 DEVELOPING.md
+build_and_deploy.sh
+package.sh

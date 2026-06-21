@@ -54,32 +54,29 @@ The MCP server runs inside the game on Windows. How a client reaches it depends 
 | # | MCP client environment | Transport | Setup |
 |---|---|---|---|
 | 1 | **Windows** (Claude Desktop, etc.) | HTTP → `http://localhost:3000/` | none — localhost reaches the game directly |
-| 2 | **WSL, mirrored networking** (Win11 22H2+) | HTTP → `http://localhost:3000/` | one-time `.wslconfig`: `[wsl2]` / `networkingMode=mirrored`, then `wsl --shutdown` |
-| 3 | **WSL, NAT networking** (default / Win10) | **stdio proxy** (`client/proxy.js`) | run host setup once (firewall + URL ACL); the proxy resolves the host gateway live, so reboots don't break it |
+| 2 | **WSL, mirrored networking** (Win11 22H2+) | HTTP → `http://localhost:3000/`, or the stdio proxy | optional one-time `.wslconfig`: `[wsl2]` / `networkingMode=mirrored` |
+| 3 | **WSL, NAT networking** (default / Win10) | **stdio proxy** (`client/proxy.js`) | `bash client/setup.sh` (firewall + URL ACL via one UAC prompt) |
 
-### Easiest: let the setup script pick (WSL)
+### WSL: one command
 
 ```bash
-client/setup.sh            # auto-detects env 1/2/3 and registers 'unity-explorer'
-# client/setup.sh http     # force HTTP localhost (env 1/2)
-# client/setup.sh stdio    # force the stdio proxy (env 3)
+bash client/setup.sh         # registers the stdio proxy (works for NAT *and* mirrored)
+# bash client/setup.sh http  # register HTTP http://localhost:3000/ instead
 ```
 
-For env 3 it will trigger the one-time Windows host setup (`client/setup.ps1`, run elevated via a UAC
-prompt) which adds the firewall rule and the `http://+:3000/` URL ACL.
+The proxy finds the game's host at runtime (tries `localhost`, then the WSL gateway), so **the game
+doesn't need to be running when you set up** — install the mod, run this, then launch the game. The
+default also runs the one-time Windows host setup (`client/setup.ps1`, one UAC prompt) which adds the
+firewall rule and the `http://+:3000/` URL ACL.
 
-### Manual registration
+### Windows client (env 1) — manual
 
 ```bash
-# env 1 (Windows client) or env 2 (WSL mirrored):
 claude mcp add --transport http unity-explorer http://localhost:3000/
-
-# env 3 (WSL NAT) — Claude Code launches the proxy itself; no IP, no background process:
-claude mcp add unity-explorer -- node /path/to/UnityExplorerTLD.MCP/client/proxy.js
 ```
 
 The stdio proxy (`client/proxy.js`) needs only Node (already present with Claude Code) — no extra
-dependency, and Claude Code starts/stops it with the session.
+dependency, no background process, no hardcoded IP; Claude Code starts/stops it with the session.
 
 ## Security
 
