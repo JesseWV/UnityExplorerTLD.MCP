@@ -15,15 +15,15 @@ runtime reflection, so it keeps working across UnityExplorer updates.
 ## Installation
 
 1. Install UnityExplorerTLD as usual (`Mods/UnityExplorerTLD.dll`, plus its `UserLibs`).
-2. Drop `UnityExplorerTLD.MCP.dll` into the game's `Mods/` folder.
+2. Download the latest [release](../../releases) and drop `UnityExplorerTLD.MCP.dll` into the game's
+   `Mods/` folder. (The release zip also contains the `client/` helpers used to connect — see below.)
 3. Launch the game.
 
 The MCP server starts automatically and logs its reachable addresses to the MelonLoader console.
 
-> **Windows URL ACL:** the server binds to `http://+:<port>/`. If `HttpListener` fails to start with
-> an access error, reserve the URL once (admin PowerShell):
-> `netsh http add urlacl url=http://+:3000/ user=Everyone`
-> — or run the game elevated.
+> If the server fails to start with a URL-access error, or a non-Windows client can't reach it, run the
+> one-time host setup as Administrator (`client/setup.ps1`) — it adds the `http://+:3000/` URL ACL and a
+> firewall rule. WSL users can let `client/setup.sh` handle this automatically.
 
 ## Configuration
 
@@ -87,12 +87,7 @@ The server validates the `Origin` header (DNS-rebinding protection): browser req
 origins are rejected; non-browser clients (Claude Code, curl) are unaffected. It still binds to all
 interfaces so a WSL client can reach it — only run it on trusted networks.
 
-## Building
+## Development
 
-```bash
-./build_and_deploy.sh
-```
-
-Builds with the Windows .NET SDK and copies the DLL into the game's `Mods/`. Override the game path
-with `-p:TheLongDarkPath="..."` if your install differs. The project intentionally has **no compile-time
-reference** to `UnityExplorerTLD.dll` — the bridge is reflection-only.
+End users don't build anything — the `.dll` ships in [Releases](../../releases). If you want to build
+from source or understand how the addon binds to UnityExplorer, see [DEVELOPING.md](DEVELOPING.md).
