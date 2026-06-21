@@ -26,15 +26,16 @@ host_setup() {
 }
 
 command -v claude >/dev/null || { echo "Claude Code CLI ('claude') not found on PATH."; exit 1; }
-claude mcp remove "$NAME" -s local >/dev/null 2>&1 || true
+# User scope = available in every Claude Code session, not just this folder.
+claude mcp remove "$NAME" -s user >/dev/null 2>&1 || true
 
 if [ "$MODE" = "http" ]; then
-  claude mcp add --transport http "$NAME" "http://localhost:$PORT/"
+  claude mcp add -s user --transport http "$NAME" "http://localhost:$PORT/"
   echo "Registered '$NAME' over HTTP localhost:$PORT (Windows client / WSL mirrored)."
 else
   host_setup
-  claude mcp add "$NAME" -- node "$PROXY"
+  claude mcp add -s user "$NAME" -- node "$PROXY"
   echo "Registered '$NAME' (stdio proxy)."
 fi
 
-echo "Done. Launch The Long Dark with the mod, then use 'unity-explorer' from Claude Code."
+echo "Done (available in all Claude Code sessions). Launch The Long Dark with the mod, then use 'unity-explorer' from Claude Code."

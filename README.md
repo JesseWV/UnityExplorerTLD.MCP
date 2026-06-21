@@ -64,10 +64,11 @@ bash client/setup.sh         # registers the stdio proxy (works for NAT *and* mi
 # bash client/setup.sh http  # register HTTP http://localhost:3000/ instead
 ```
 
-The proxy finds the game's host at runtime (tries `localhost`, then the WSL gateway), so **the game
-doesn't need to be running when you set up** — install the mod, run this, then launch the game. The
-default also runs the one-time Windows host setup (`client/setup.ps1`, one UAC prompt) which adds the
-firewall rule and the `http://+:3000/` URL ACL.
+It registers user-wide (available in every Claude Code session). The proxy finds the game's host at
+runtime (tries `localhost`, then the WSL gateway), so **the game doesn't need to be running when you
+set up** — install the mod, run this, then launch the game. The default also runs the one-time Windows
+host setup (`client/setup.ps1`, one UAC prompt) which adds the firewall rule and the `http://+:3000/`
+URL ACL.
 
 ### Windows client (env 1) — manual
 
