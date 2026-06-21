@@ -86,8 +86,3 @@ dependency, and Claude Code starts/stops it with the session.
 The server validates the `Origin` header (DNS-rebinding protection): browser requests from non-local
 origins are rejected; non-browser clients (Claude Code, curl) are unaffected. It still binds to all
 interfaces so a WSL client can reach it — only run it on trusted networks.
-
-## Development
-
-End users don't build anything — the `.dll` ships in [Releases](../../releases). If you want to build
-from source or understand how the addon binds to UnityExplorer, see [DEVELOPING.md](DEVELOPING.md).
