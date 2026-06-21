@@ -48,31 +48,38 @@ A spec-aligned MCP server (JSON-RPC 2.0 over HTTP POST; protocol revision `2025-
 
 ## Connecting your MCP client
 
-The server speaks MCP over HTTP. **Point your client at `http://localhost:3000/`** — use that
-single stable URL in every setup below (never a baked-in IP, which breaks across reboots).
+The MCP server runs inside the game on Windows. How a client reaches it depends only on where the
+**client** runs. All three supported environments are covered — the address never needs an IP.
 
-| Where your MCP client runs | What you need |
-|---|---|
-| **Windows** (Claude Desktop, Claude Code for Windows, …) | Nothing — `localhost:3000` already reaches the game. No firewall rule, no IP. |
-| **WSL with mirrored networking** (Windows 11 22H2+) | One-time: add `[wsl2]`/`networkingMode=mirrored` to `%UserProfile%\.wslconfig`, then `wsl --shutdown`. `localhost:3000` then reaches the host directly. |
-| **WSL with NAT networking** (default / Windows 10) | Run the bridge: `python3 tools/wsl-bridge.py` (keeps `localhost:3000` pointed at the current Windows-host gateway, which changes across reboots). Also add a one-time Windows inbound firewall rule for TCP 3000 (elevated PowerShell): `New-NetFirewallRule -DisplayName "TLD MCP" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 3000`. |
+| # | MCP client environment | Transport | Setup |
+|---|---|---|---|
+| 1 | **Windows** (Claude Desktop, etc.) | HTTP → `http://localhost:3000/` | none — localhost reaches the game directly |
+| 2 | **WSL, mirrored networking** (Win11 22H2+) | HTTP → `http://localhost:3000/` | one-time `.wslconfig`: `[wsl2]` / `networkingMode=mirrored`, then `wsl --shutdown` |
+| 3 | **WSL, NAT networking** (default / Win10) | **stdio proxy** (`client/proxy.js`) | run host setup once (firewall + URL ACL); the proxy resolves the host gateway live, so reboots don't break it |
 
-Register with Claude Code (any of the above):
+### Easiest: let the setup script pick (WSL)
 
 ```bash
+client/setup.sh            # auto-detects env 1/2/3 and registers 'unity-explorer'
+# client/setup.sh http     # force HTTP localhost (env 1/2)
+# client/setup.sh stdio    # force the stdio proxy (env 3)
+```
+
+For env 3 it will trigger the one-time Windows host setup (`client/setup.ps1`, run elevated via a UAC
+prompt) which adds the firewall rule and the `http://+:3000/` URL ACL.
+
+### Manual registration
+
+```bash
+# env 1 (Windows client) or env 2 (WSL mirrored):
 claude mcp add --transport http unity-explorer http://localhost:3000/
+
+# env 3 (WSL NAT) — Claude Code launches the proxy itself; no IP, no background process:
+claude mcp add unity-explorer -- node /path/to/UnityExplorerTLD.MCP/client/proxy.js
 ```
 
-### Autostarting the WSL bridge (NAT users)
-
-The bridge only needs to run while you use the MCP client. To start it automatically, add to `~/.bashrc`:
-
-```bash
-pgrep -f wsl-bridge.py >/dev/null || (python3 /path/to/UnityExplorerTLD.MCP/tools/wsl-bridge.py &>/dev/null &)
-```
-
-It requires only `python3` and resolves the Windows-host gateway live per connection, so it
-survives reboots and IP changes with no reconfiguration.
+The stdio proxy (`client/proxy.js`) needs only Node (already present with Claude Code) — no extra
+dependency, and Claude Code starts/stops it with the session.
 
 ## Security
 
